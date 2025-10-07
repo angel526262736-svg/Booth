@@ -1,0 +1,20 @@
+include <stdio.h>
+
+/*
+ * void* es un tipo especial de puntero que puede apuntar
+ * a cualquier tipo de dato, pero no sabe qué tipo de dato
+ * está apuntando. Es como un puntero genérico.
+ */
+
+void imprimir_entero(void* un_puntero) {
+    int *puntero_entero = (int*) un_puntero; // convertir a puntero a entero
+    printf("Valor: %d\n", *puntero_entero);
+    printf("La direccion es: %p \n", *puntero_entero);
+}
+
+int main() {
+    int x = 42;
+    // se la manda la direccion de la variable x
+    imprimir_entero(&x); // pasamos puntero como void*
+    return 0;
+}
