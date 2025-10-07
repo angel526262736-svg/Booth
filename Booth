@@ -1,194 +1,64 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+puteros2.c
+/*Los punteros en C son una de las características más
+  poderosas y fundamentales del lenguaje. Son variables
+  que almacenan la dirección de memoria de otra variable,
+  en lugar de su valor directamente.
+  
+ ¿Qué significa esto?
+ Imagina que una variable es una casa, y su dirección es
+ dónde está ubicada. Un puntero no guarda lo que hay
+ dentro de la casa, sino la dirección de esa casa.
+*/
 
-public class BoothMultiplicationGUI extends JFrame {
-    private JTextField multiplicandField;
-    private JTextField multiplierField;
-    private JTextArea outputArea;
+#include <stdio.h>
 
-    public BoothMultiplicationGUI() {
-        setTitle("Booth's Multiplication Algorithm");
-        setSize(600, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        // Input panel
-        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        JLabel multiplicandLabel = new JLabel("Multiplicand (-128 to 127):");
-        multiplicandField = new JTextField();
-        JLabel multiplierLabel = new JLabel("Multiplier (-128 to 127):");
-        multiplierField = new JTextField();
-        JButton computeButton = new JButton("Compute");
-
-        inputPanel.add(multiplicandLabel);
-        inputPanel.add(multiplicandField);
-        inputPanel.add(multiplierLabel);
-        inputPanel.add(multiplierField);
-        inputPanel.add(new JLabel()); // Spacer
-        inputPanel.add(computeButton);
-
-        // Output area
-        outputArea = new JTextArea();
-        outputArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(outputArea);
-
-        add(inputPanel, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
-
-        // Action listener for button
-        computeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int multiplicand = Integer.parseInt(multiplicandField.getText());
-                    int multiplier = Integer.parseInt(multiplierField.getText());
-
-                    if (multiplicand < -128 || multiplicand > 127 || multiplier < -128 || multiplier > 127) {
-                        outputArea.setText("Error: Numbers must be between -128 and 127 for 8-bit representation.");
-                        return;
-                    }
-
-                    outputArea.setText(""); // Clear previous output
-                    boothMultiply(multiplicand, multiplier);
-                } catch (NumberFormatException ex) {
-                    outputArea.setText("Error: Please enter valid integers.");
-                }
-            }
-        });
-    }
-
-    /**
-     * Converts an integer to its 8-bit two's complement binary representation.
-     * @param value The integer value (-128 to 127).
-     * @return 8-bit binary string.
+int main() {
+  /*
+   * Aquí se define una variable llamada x del tipo entero la
+   * cual tiene un valor de 42
+   */
+    int x = 42;
+    int edad = 40;
+    /*
+     * ¿Cómo se define un puntero?
+     * puntero a un entero
+     * int *mi_puntero;
+     *
+     * int x = 10;      Variable normal
+     * int *mi_puntero; Definición de un puntero a entero
+     * mi_puntero = &x; El puntero guarda la dirección de x
+     *
+     * El operador * se llama operador de desreferenciación y
+     * permite acceder al valor almacenado en la dirección
+     * que apunta el puntero.
+     *
      */
-    private String toTwosComplement(int value) {
-        int bits = 8;
-        int mask = (1 << bits) - 1;
-        int masked = value & mask;
-        String bin = Integer.toBinaryString(masked);
-        return String.format("%" + bits + "s", bin).replace(' ', '0');
-    }
+    
+    
 
-    /**
-     * Adds two 8-bit binary strings (two's complement addition, ignores overflow carry).
-     * @param x First binary string.
-     * @param y Second binary string.
-     * @return Result binary string.
+    int *mi_puntero = &x;
+    int *edad_puntero = &edad;
+
+    printf("Valor de x: %d\n", x);
+//   
+    printf("Valor del  puntero (dirección): %p\n", mi_puntero);
+    //printf("Valor apuntado por mi_puntero: %d\n", *mi_puntero);
+
+    printf("-------------------------------------------------- \n");
+    printf("El valor de la edad es: %d \n", edad);
+    printf("La direccion de la variable edad es: %p \n", edad_puntero);
+
+    /*
+     * ¿Para qué sirven?
+     *
+     * - Pasar variables por referencia a funciones
+     *
+     * - Manipular arreglos y cadenas
+     *
+     * - Asignar memoria dinámicamente con malloc, calloc, etc.
+     *
+     * - Construir estructuras complejas como listas enlazadas, árboles, etc.
      */
-    private String addBinary(String x, String y) {
-        int bits = 8;
-        StringBuilder result = new StringBuilder();
-        int carry = 0;
-        for (int i = bits - 1; i >= 0; i--) {
-            int sum = (x.charAt(i) - '0') + (y.charAt(i) - '0') + carry;
-            result.append(sum % 2);
-            carry = sum / 2;
-        }
-        // Ignore carry for 8-bit overflow simulation
-        return result.reverse().toString();
-    }
 
-    /**
-     * Computes the two's complement negation of a binary string (for subtraction).
-     * @param bin Binary string.
-     * @return Negated binary string.
-     */
-    private String negate(String bin) {
-        StringBuilder inverted = new StringBuilder();
-        for (char c : bin.toCharArray()) {
-            inverted.append(c == '0' ? '1' : '0');
-        }
-        // Add 1 to the inverted bits
-        return addBinary(inverted.toString(), "00000001");
-    }
-
-    /**
-     * Performs Booth's multiplication algorithm and appends the steps to the output area.
-     * @param multiplicand The multiplicand (M).
-     * @param multiplier The multiplier (Q).
-     */
-    private void boothMultiply(int multiplicand, int multiplier) {
-        String M = toTwosComplement(multiplicand);
-        String A = "00000000"; // Accumulator initialized to 0
-        String Q = toTwosComplement(multiplier);
-        char Q_1 = '0'; // Previous bit (Q-1)
-        int n = 8; // Number of bits
-
-        appendOutput("Multiplicand (M): " + M + " (" + multiplicand + ")\n");
-        appendOutput("Multiplier (Q): " + Q + " (" + multiplier + ")\n\n");
-        appendOutput("Step-by-step procedure:\n");
-
-        // Print table header
-        appendOutput(String.format("%-3s %-8s %-8s %-1s %-8s %-20s%n", "Step", "A", "Q", "Q-1", "M", "Operation"));
-
-        // Initial state
-        appendOutput(String.format("%-3s %-8s %-8s %-1s %-8s %-20s%n", "0", A, Q, Q_1, M, "Initial values"));
-
-        for (int step = 1; step <= n; step++) {
-            char Q0 = Q.charAt(7); // LSB of Q
-            String pair = "" + Q0 + Q_1;
-
-            String operation = "No operation (shift only)";
-            if (pair.equals("01")) {
-                A = addBinary(A, M);
-                operation = "A <- A + M";
-            } else if (pair.equals("10")) {
-                String minusM = negate(M);
-                A = addBinary(A, minusM);
-                operation = "A <- A - M";
-            }
-
-            // Print state before shift
-            appendOutput(String.format("%-3s %-8s %-8s %-1s %-8s %-20s%n", step, A, Q, Q_1, M, operation));
-
-            // Arithmetic right shift on A|Q
-            String combined = A + Q; // 16 bits
-            char sign = A.charAt(0); // Sign bit for extension
-            String shifted = sign + combined.substring(0, 15);
-
-            // Update A and Q
-            A = shifted.substring(0, 8);
-            Q = shifted.substring(8, 16);
-
-            // Update Q-1 to old Q0
-            Q_1 = Q0;
-
-            // Print shift operation (optional, but to show displacement)
-            if (step < n) {
-                appendOutput(String.format("%-3s %-8s %-8s %-1s %-8s %-20s%n", "", A, Q, Q_1, M, "Arithmetic right shift"));
-            }
-        }
-
-        // Final result
-        String resultBinary = A + Q;
-        // Interpret as 16-bit signed integer
-        int resultDecimal = (short) Integer.parseInt(resultBinary, 2);
-
-        appendOutput("\nFinal result (binary): " + resultBinary + "\n");
-        appendOutput("Final result (decimal): " + resultDecimal + "\n");
-        // Verify with direct multiplication
-        appendOutput("Verification (direct): " + multiplicand + " * " + multiplier + " = " + (multiplicand * multiplier) + "\n");
-    }
-
-    /**
-     * Appends text to the output area.
-     * @param text The text to append.
-     */
-    private void appendOutput(String text) {
-        outputArea.append(text);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new BoothMultiplicationGUI().setVisible(true);
-            }
-        });
-    }
+    return 0;
 }
